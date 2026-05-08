@@ -340,7 +340,14 @@ function exportPDF() {
 
         margin: 5,
         filename:
-            document.getElementById("orderNo").value + '.pdf',
+            (
+                'Kw' +
+                (
+                    document.getElementById("orderNo")
+                        .value
+                        .replace('#', '')
+                )
+            ) + '.pdf',
 
         image: {
             type: 'jpeg',
@@ -381,7 +388,7 @@ function generateInvoiceNumber() {
     );
 
     const formatted =
-        "Kw" +
+        "#" +
         String(currentNumber).padStart(4, "0");
 
     document.getElementById("orderNo").value =
