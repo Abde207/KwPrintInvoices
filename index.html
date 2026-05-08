@@ -1,0 +1,262 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Invoice Tool</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Cairo Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+    <!-- LANGUAGE SELECTION -->
+    <div id="languageScreen" class="language-screen">
+        <div class="language-card">
+            <h1>Select Language / اختر اللغة</h1>
+
+            <div class="lang-buttons">
+                <button onclick="setLanguage('en')">English</button>
+                <button onclick="setLanguage('ar')">العربية</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app" class="hidden">
+
+        <!-- FORM SCREEN -->
+        <section id="formScreen" class="screen active">
+
+            <div class="container">
+
+                <div class="top-bar">
+                    <h2 id="formTitle">Invoice Generator</h2>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label id="labelOrderNo">Order Number</label>
+                        <input type="text" id="orderNo">
+                    </div>
+
+                    <div class="form-group">
+                        <label id="labelIssueDate">Issue Date</label>
+                        <input type="date" id="issueDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label id="labelCustomerName">Customer Name</label>
+                        <input type="text" id="customerName">
+                    </div>
+
+                    <div class="form-group">
+                        <label id="labelDelivery">Delivery Location</label>
+                        <input type="text" id="deliveryLocation">
+                    </div>
+
+                    <div class="form-group">
+                        <label id="labelPayment">Payment Method</label>
+                        <input type="text" id="paymentMethod">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label id="labelNotes">Additional Notes</label>
+                        <textarea id="notes"></textarea>
+                    </div>
+
+                </div>
+
+                <!-- ITEMS TABLE -->
+                <div class="table-wrapper">
+
+                    <table id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th id="thItem">Item</th>
+                                <th id="thSize">Size</th>
+                                <th id="thQty">Quantity</th>
+
+                                <th>
+                                    <div class="total-header">
+                                        <span id="thTotal">Total</span>
+                                        <small id="currencySplit">Dinar / Fils</small>
+                                    </div>
+                                </th>
+
+                                <th id="thAction">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <div class="table-actions">
+                    <button class="secondary-btn" onclick="addRow()" id="addRowBtn">
+                        + Add Item
+                    </button>
+                </div>
+
+                <!-- TOTALS -->
+                <div class="totals-section">
+
+                    <div class="total-box">
+                        <label id="labelFinalTotal">Final Total</label>
+                        <input type="text" id="finalTotal" readonly>
+                    </div>
+
+                    <div class="total-box">
+                        <label id="labelPaidAmount">Paid Amount (Including Delivery)</label>
+                        <input type="text" id="paidAmount" class="decimal-only">
+                    </div>
+
+                </div>
+
+                <div class="main-actions">
+                    <button class="primary-btn" onclick="generatePreview()" id="previewBtn">
+                        Preview Invoice
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PREVIEW SCREEN -->
+        <section id="previewScreen" class="screen">
+
+            <div class="container">
+
+                <div class="preview-actions">
+                    <button class="secondary-btn" onclick="backToForm()" id="backBtn">
+                        Back
+                    </button>
+
+                    <button class="primary-btn" onclick="exportPDF()" id="pdfBtn">
+                        Export PDF
+                    </button>
+                </div>
+
+                <!-- PRINT AREA -->
+                <div id="invoicePreview" class="invoice-paper">
+
+                    <!-- HEADER -->
+                    <div class="invoice-header">
+
+                        <div class="company-section">
+                            <img src="kwPrinitng.png" alt="Logo" class="company-logo">
+
+                            <div>
+                                <h1 class="company-name">KwPrinting</h1>
+                                <p class="invoice-title" id="invoiceLabel">Invoice</p>
+                            </div>
+                        </div>
+
+                        <div class="invoice-meta">
+
+                            <div class="meta-row">
+                                <span id="previewOrderLabel">Order No:</span>
+                                <strong id="previewOrderNo"></strong>
+                            </div>
+
+                            <div class="meta-row">
+                                <span id="previewDateLabel">Issue Date:</span>
+                                <strong id="previewIssueDate"></strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CUSTOMER -->
+                    <div class="customer-section">
+
+                        <div class="customer-card">
+                            <h3 id="previewCustomerLabel">Customer Name</h3>
+                            <p id="previewCustomer"></p>
+                        </div>
+
+                        <div class="customer-card">
+                            <h3 id="previewDeliveryLabel">Delivery Location</h3>
+                            <p id="previewDelivery"></p>
+                        </div>
+
+                        <div class="customer-card">
+                            <h3 id="previewPaymentLabel">Payment Method</h3>
+                            <p id="previewPayment"></p>
+                        </div>
+
+                    </div>
+
+                    <!-- TABLE -->
+                    <table class="preview-table">
+
+                        <thead>
+                            <tr>
+                                <th id="previewItemHeader">Item</th>
+                                <th id="previewSizeHeader">Size</th>
+                                <th id="previewQtyHeader">Qty</th>
+                                <th colspan="2" id="previewTotalHeader">Total</th>
+                            </tr>
+
+                            <tr class="currency-subhead">
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th id="dinarLabel">Dinar</th>
+                                <th id="filsLabel">Fils</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="previewTableBody"></tbody>
+
+                    </table>
+
+                    <!-- TOTALS -->
+                    <div class="summary-section">
+
+                        <div class="summary-box">
+                            <span id="summaryTotalLabel">Final Total</span>
+                            <strong id="summaryTotal"></strong>
+                        </div>
+
+                        <div class="summary-box">
+                            <span id="summaryPaidLabel">Paid Amount</span>
+                            <strong id="summaryPaid"></strong>
+                        </div>
+
+                    </div>
+
+                    <!-- NOTES -->
+                    <div class="notes-section">
+                        <h3 id="notesLabelPreview">Notes</h3>
+                        <p id="previewNotes"></p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
