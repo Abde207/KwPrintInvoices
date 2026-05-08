@@ -203,7 +203,8 @@ td input {
 
     width: 195mm;
     min-height: 210mm;
-
+    padding: 12mm;
+    box-sizing: border-box;
     margin: auto;
     padding: 18px;
 

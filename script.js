@@ -338,7 +338,7 @@ function exportPDF() {
 
     const options = {
 
-        margin: 0,
+        margin: 5,
         filename:
             document.getElementById("orderNo").value + '.pdf',
 
@@ -346,15 +346,15 @@ function exportPDF() {
             type: 'jpeg',
             quality: 1
         },
-
+        /*    aaaaaaaa tsesttt */
         html2canvas: {
-            scale: 2,
+            scale: 0.9,
             useCORS: true
         },
 
         jsPDF: {
             unit: 'mm',
-            format: 'a5',
+            format: 'a4',
             orientation: 'portrait'
         }
     };
