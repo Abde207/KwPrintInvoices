@@ -70,6 +70,8 @@ function setLanguage(lang) {
     if (document.querySelectorAll("#tableBody tr").length === 0) {
         addRow();
     }
+
+    generateInvoiceNumber();
 }
 
 function applyTranslations() {
@@ -351,10 +353,36 @@ function exportPDF() {
 
         jsPDF: {
             unit: 'mm',
-            format: 'a4',
+            format: 'a5',
             orientation: 'portrait'
         }
     };
 
     html2pdf().set(options).from(invoice).save();
+}
+
+// SERIAL NUMBER SYSTEM
+
+function generateInvoiceNumber() {
+
+    let currentNumber =
+        localStorage.getItem("invoiceCounter");
+
+    if (!currentNumber) {
+        currentNumber = 1;
+    } else {
+        currentNumber = parseInt(currentNumber) + 1;
+    }
+
+    localStorage.setItem(
+        "invoiceCounter",
+        currentNumber
+    );
+
+    const formatted =
+        "#" +
+        String(currentNumber).padStart(4, "0");
+
+    document.getElementById("orderNo").value =
+        formatted;
 }

@@ -200,11 +200,17 @@ td input {
 
 .invoice-paper {
     background: white;
-    width: 210mm;
-    min-height: 297mm;
+
+    width: 195mm;
+    min-height: 210mm;
+
     margin: auto;
-    padding: 30px;
+    padding: 18px;
+
     box-shadow: 0 0 18px rgba(0, 0, 0, 0.08);
+
+    position: relative;
+    overflow: hidden;
 }
 
 .invoice-header {
@@ -349,4 +355,78 @@ body.rtl .summary-box {
         box-shadow: none;
         margin: 0;
     }
+}
+
+/* WATERMARK LOGO */
+
+.invoice-paper {
+    position: relative;
+    overflow: hidden;
+}
+
+.watermark-logo {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    opacity: 0.05;
+
+    pointer-events: none;
+    user-select: none;
+
+    z-index: 0;
+}
+
+.watermark-logo img {
+    width: 340px;
+    object-fit: contain;
+}
+
+/* STAMP */
+
+.invoice-stamp {
+    position: absolute;
+
+    top: 120px;
+    right: 60px;
+
+    transform: rotate(-20deg);
+
+    border: 6px solid #16a34a;
+    color: #16a34a;
+
+    padding: 12px 28px;
+
+    font-size: 42px;
+    font-weight: 700;
+
+    border-radius: 14px;
+
+    opacity: 0.18;
+
+    letter-spacing: 4px;
+
+    pointer-events: none;
+    user-select: none;
+
+    z-index: 10;
+}
+
+/* KEEP CONTENT ABOVE WATERMARK */
+
+.invoice-header,
+.customer-section,
+.preview-table,
+.summary-section,
+.notes-section {
+    position: relative;
+    z-index: 2;
+}
+
+#previewOrderNo {
+    color: #dc2626;
+    font-weight: 700;
 }
