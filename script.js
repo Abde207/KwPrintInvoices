@@ -381,7 +381,7 @@ function generateInvoiceNumber() {
     );
 
     const formatted =
-        "#" +
+        "Kw" +
         String(currentNumber).padStart(4, "0");
 
     document.getElementById("orderNo").value =
