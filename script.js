@@ -339,7 +339,8 @@ function exportPDF() {
     const options = {
 
         margin: 0,
-        filename: 'invoice.pdf',
+        filename:
+            document.getElementById("orderNo").value + '.pdf',
 
         image: {
             type: 'jpeg',
