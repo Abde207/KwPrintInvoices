@@ -71,7 +71,7 @@ function setLanguage(lang) {
         addRow();
     }
 
-    generateInvoiceNumber();
+    getCurrentInvoiceNumber();
 }
 
 function applyTranslations() {
@@ -388,18 +388,26 @@ function exportPDF() {
         }
     };
 
-    html2pdf().set(options).from(invoice).save();
+    html2pdf()
+        .set(options)
+        .from(invoice)
+        .save()
+        .then(async () => {
+
+            await incrementInvoiceNumber();
+
+            await getCurrentInvoiceNumber();
+        });
 }
 
 // SERIAL NUMBER SYSTEM
 
-async function generateInvoiceNumber() {
+async function getCurrentInvoiceNumber() {
 
     const {
         doc,
         getDoc,
-        setDoc,
-        updateDoc
+        setDoc
     } = window.firebaseTools;
 
     const counterRef =
@@ -419,11 +427,7 @@ async function generateInvoiceNumber() {
     } else {
 
         currentNumber =
-            counterSnap.data().current + 1;
-
-        await updateDoc(counterRef, {
-            current: currentNumber
-        });
+            counterSnap.data().current;
     }
 
     const formatted =
@@ -433,4 +437,28 @@ async function generateInvoiceNumber() {
 
     document.getElementById("orderNo").value =
         formatted;
+}
+async function incrementInvoiceNumber() {
+
+    const {
+        doc,
+        getDoc,
+        updateDoc
+    } = window.firebaseTools;
+
+    const counterRef =
+        doc(window.db, "system", "invoiceCounter");
+
+    const counterSnap =
+        await getDoc(counterRef);
+
+    if (counterSnap.exists()) {
+
+        const currentNumber =
+            counterSnap.data().current;
+
+        await updateDoc(counterRef, {
+            current: currentNumber + 1
+        });
+    }
 }
