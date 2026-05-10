@@ -92,8 +92,19 @@ function applyTranslations() {
     document.getElementById("thTotal").innerText = t.total;
     document.getElementById("thAction").innerText = t.action;
 
-    document.getElementById("currencySplit").innerText =
+    /*document.getElementById("currencySplit").innerText =
         `${t.dinar} / ${t.fils}`;
+*/
+    if (currentLanguage === "ar") {
+
+        document.getElementById("currencySplit").innerText =
+            `${t.fils} / ${t.dinar}`;
+
+    } else {
+
+        document.getElementById("currencySplit").innerText =
+            `${t.dinar} / ${t.fils}`;
+    }
 
     document.getElementById("addRowBtn").innerText =
         `+ ${t.addItem}`;
@@ -143,11 +154,22 @@ function applyTranslations() {
     document.getElementById("previewTotalHeader").innerText =
         t.total;
 
-    document.getElementById("dinarLabel").innerText =
-        t.dinar;
+    if (currentLanguage === "ar") {
 
-    document.getElementById("filsLabel").innerText =
-        t.fils;
+        document.getElementById("dinarLabel").innerText =
+            t.fils;
+
+        document.getElementById("filsLabel").innerText =
+            t.dinar;
+
+    } else {
+
+        document.getElementById("dinarLabel").innerText =
+            t.dinar;
+
+        document.getElementById("filsLabel").innerText =
+            t.fils;
+    }
 
     document.getElementById("summaryTotalLabel").innerText =
         t.finalTotal;
@@ -371,25 +393,43 @@ function exportPDF() {
 
 // SERIAL NUMBER SYSTEM
 
-function generateInvoiceNumber() {
+async function generateInvoiceNumber() {
 
-    let currentNumber =
-        localStorage.getItem("invoiceCounter");
+    const {
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc
+    } = window.firebaseTools;
 
-    if (!currentNumber) {
-        currentNumber = 1;
+    const counterRef =
+        doc(window.db, "system", "invoiceCounter");
+
+    const counterSnap =
+        await getDoc(counterRef);
+
+    let currentNumber = 1;
+
+    if (!counterSnap.exists()) {
+
+        await setDoc(counterRef, {
+            current: 1
+        });
+
     } else {
-        currentNumber = parseInt(currentNumber) + 1;
-    }
 
-    localStorage.setItem(
-        "invoiceCounter",
-        currentNumber
-    );
+        currentNumber =
+            counterSnap.data().current + 1;
+
+        await updateDoc(counterRef, {
+            current: currentNumber
+        });
+    }
 
     const formatted =
         "#" +
-        String(currentNumber).padStart(4, "0");
+        String(currentNumber)
+            .padStart(4, "0");
 
     document.getElementById("orderNo").value =
         formatted;

@@ -259,7 +259,48 @@
         </section>
 
     </div>
+    <script type="module">
 
+        import { initializeApp }
+            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+        import {
+            getFirestore,
+            doc,
+            getDoc,
+            setDoc,
+            updateDoc
+        }
+            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyCypx0QH6jbvp1krzhg5FwCXgX02KQEveA",
+
+            authDomain: "invoiceskw-d1c12.firebaseapp.com",
+
+            projectId: "invoiceskw-d1c12",
+            storageBucket: "invoiceskw-d1c12.firebasestorage.app",
+            messagingSenderId: "560451783348",
+            appId: "1:560451783348:web:7f9bee313b30f68e9a65e1",
+            measurementId: "G-2QTJMNGT9S"
+        };
+
+        const app =
+            initializeApp(firebaseConfig);
+
+        const db =
+            getFirestore(app);
+
+        window.db = db;
+        window.firebaseTools = {
+            doc,
+            getDoc,
+            setDoc,
+            updateDoc
+        };
+
+    </script>
     <script src="script.js"></script>
 
 </body>

@@ -242,10 +242,10 @@ td input {
     color: #666;
 }
 
-.invoice-meta {
+/*.invoice-meta {
     min-width: 220px;
 }
-
+*/
 .meta-row {
     display: flex;
     justify-content: space-between;
@@ -316,7 +316,8 @@ body.rtl .company-section {
     flex-direction: row-reverse;
 }
 
-body.rtl .meta-row,
+/*body.rtl .meta-row,*/
+
 body.rtl .summary-box {
     flex-direction: row-reverse;
 }
@@ -430,4 +431,166 @@ body.rtl .summary-box {
 #previewOrderNo {
     color: #dc2626;
     font-weight: 700;
+}
+
+/* =========================
+   PROFESSIONAL RTL FIXES
+========================= */
+
+body.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+/* HEADER */
+
+body.rtl .invoice-header {
+    flex-direction: row-reverse;
+}
+
+body.rtl .company-section {
+    flex-direction: row-reverse;
+}
+
+/* ORDER INFO */
+
+body.rtl .invoice-meta {
+    align-items: flex-end;
+    text-align: right;
+}
+
+/*body.rtl .order-row {
+    flex-direction: row-reverse;
+}
+*/
+.order-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-height: 32px;
+}
+
+.order-value {
+    min-width: 80px;
+}
+
+.invoice-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    width: 320px;
+}
+
+.order-row {
+    display: flex;
+    align-items: center;
+
+    justify-content: space-between;
+
+    width: 100%;
+}
+
+.order-label {
+    font-weight: 700;
+    color: #222;
+}
+
+.order-value {
+    color: #dc2626;
+    font-weight: 700;
+
+    min-width: 140px;
+
+    display: inline-block;
+}
+
+/* CUSTOMER CARDS */
+
+body.rtl .customer-card {
+    text-align: right;
+}
+
+/* TABLE */
+
+body.rtl table {
+    direction: rtl;
+}
+
+body.rtl th,
+body.rtl td {
+    text-align: center;
+}
+
+/* NOTES */
+
+body.rtl .notes-section {
+    text-align: right;
+}
+
+/* SUMMARY */
+
+body.rtl .summary-section {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+body.rtl .summary-box {
+    flex-direction: row-reverse;
+}
+
+/* PAID STAMP */
+
+body.rtl .invoice-stamp {
+    right: auto;
+    left: 45px;
+
+    transform: rotate(18deg);
+}
+
+/* WATERMARK */
+
+body.rtl .watermark-logo {
+    left: 50%;
+}
+
+/* INPUTS */
+
+body.rtl input,
+body.rtl textarea {
+    text-align: right;
+}
+
+/* FORM LABELS */
+
+body.rtl .form-group label {
+    text-align: right;
+}
+
+/* BUTTONS */
+
+body.rtl .preview-actions,
+body.rtl .main-actions,
+body.rtl .table-actions {
+    justify-content: flex-start;
+}
+
+.order-label,
+.order-value {
+    display: inline-block;
+}
+
+.order-label {
+    font-weight: 700;
+    color: #222;
+}
+
+.order-value {
+    color: #dc2626;
+    font-weight: 500;
+
+    min-width: 50x;
+
+    text-align: left;
 }
