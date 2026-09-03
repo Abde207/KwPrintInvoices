@@ -258,6 +258,59 @@
 
         </section>
 
+        <!-- ARABIC APP: kept separate from the English view so RTL layout is native. -->
+        <section id="arabicFormScreen" class="screen arabic-view" lang="ar" dir="rtl">
+            <div class="container">
+                <div class="top-bar"><h2>إنشاء فاتورة</h2></div>
+                <div class="form-grid">
+                    <div class="form-group"><label for="arOrderNo">رقم الطلب</label><input type="text" id="arOrderNo" dir="ltr"></div>
+                    <div class="form-group"><label for="arIssueDate">تاريخ الإصدار</label><input type="date" id="arIssueDate" dir="ltr"></div>
+                    <div class="form-group"><label for="arCustomerName">اسم العميل</label><input type="text" id="arCustomerName" dir="auto"></div>
+                    <div class="form-group"><label for="arDeliveryLocation">موقع التوصيل</label><input type="text" id="arDeliveryLocation" dir="auto"></div>
+                    <div class="form-group"><label for="arPaymentMethod">طريقة الدفع</label><input type="text" id="arPaymentMethod" dir="auto"></div>
+                    <div class="form-group full-width"><label for="arNotes">ملاحظات إضافية</label><textarea id="arNotes" dir="auto"></textarea></div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="arabic-table">
+                        <thead><tr><th>الصنف</th><th>المقاس</th><th>الكمية</th><th colspan="2">الإجمالي <small>(فلس / دينار)</small></th><th>إجراء</th></tr>
+                        <tr class="currency-subhead"><th></th><th></th><th></th><th>فلس</th><th>دينار</th><th></th></tr></thead>
+                        <tbody id="arTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="table-actions"><button class="secondary-btn" type="button" onclick="addRow()">+ إضافة عنصر</button></div>
+                <div class="totals-section">
+                    <div class="total-box"><label for="arFinalTotal">الإجمالي النهائي</label><input type="text" id="arFinalTotal" readonly dir="ltr"></div>
+                    <div class="total-box"><label for="arPaidAmount">المبلغ المدفوع شامل التوصيل</label><input type="text" id="arPaidAmount" class="decimal-only" inputmode="decimal" dir="ltr"></div>
+                </div>
+                <div class="main-actions"><button class="primary-btn" type="button" onclick="generatePreview()">معاينة الفاتورة</button></div>
+            </div>
+        </section>
+
+        <section id="arabicPreviewScreen" class="screen arabic-view" lang="ar" dir="rtl">
+            <div class="container">
+                <div class="preview-actions"><button class="secondary-btn" type="button" onclick="backToForm()">رجوع</button><button class="primary-btn" type="button" onclick="exportPDF()">تصدير PDF</button></div>
+                <div id="arabicInvoicePreview" class="invoice-paper arabic-invoice">
+                    <div class="watermark-logo"><img src="kwPrinitng.png" alt="علامة مائية"></div>
+                    <div class="invoice-stamp">مدفوع</div>
+                    <header class="invoice-header">
+                        <div class="company-section"><img src="kwPrinitng.png" alt="شعار الشركة" class="company-logo"><div><h1 class="company-name">KwPrinting</h1><p class="invoice-title">فاتورة</p></div></div>
+                        <div class="invoice-meta">
+                            <div class="meta-row"><span>رقم الطلب:</span><strong id="arPreviewOrderNo" dir="ltr"></strong></div>
+                            <div class="meta-row"><span>تاريخ الإصدار:</span><strong id="arPreviewIssueDate" dir="ltr"></strong></div>
+                        </div>
+                    </header>
+                    <div class="customer-section">
+                        <div class="customer-card"><h3>اسم العميل</h3><p id="arPreviewCustomer" dir="auto"></p></div>
+                        <div class="customer-card"><h3>موقع التوصيل</h3><p id="arPreviewDelivery" dir="auto"></p></div>
+                        <div class="customer-card"><h3>طريقة الدفع</h3><p id="arPreviewPayment" dir="auto"></p></div>
+                    </div>
+                    <table class="preview-table arabic-table"><thead><tr><th>الصنف</th><th>المقاس</th><th>الكمية</th><th colspan="2">الإجمالي</th></tr><tr class="currency-subhead"><th></th><th></th><th></th><th>فلس</th><th>دينار</th></tr></thead><tbody id="arPreviewTableBody"></tbody></table>
+                    <div class="summary-section"><div class="summary-box"><span>الإجمالي النهائي</span><strong id="arSummaryTotal" dir="ltr"></strong></div><div class="summary-box"><span>المبلغ المدفوع</span><strong id="arSummaryPaid" dir="ltr"></strong></div></div>
+                    <div class="notes-section"><h3>ملاحظات إضافية</h3><p id="arPreviewNotes" dir="auto"></p></div>
+                </div>
+            </div>
+        </section>
+
     </div>
     <script type="module">
 

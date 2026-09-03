@@ -594,3 +594,108 @@ body.rtl .table-actions {
 
     text-align: left;
 }
+
+/* =========================
+   STANDALONE ARABIC VIEW
+   These rules do not alter the English screens.
+========================= */
+.arabic-view {
+    direction: rtl;
+    text-align: right;
+}
+
+.arabic-view .form-group label,
+.arabic-view .customer-card,
+.arabic-view .notes-section {
+    text-align: right;
+}
+
+.arabic-view input[dir="ltr"],
+.arabic-view textarea[dir="ltr"],
+.arabic-view .amount-input,
+.arabic-view input[type="number"] {
+    direction: ltr;
+    text-align: left;
+}
+
+.arabic-view input[dir="auto"],
+.arabic-view textarea[dir="auto"] {
+    direction: rtl;
+    text-align: right;
+}
+
+.arabic-view .arabic-table {
+    direction: rtl;
+}
+
+.arabic-view .arabic-table th,
+.arabic-view .arabic-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.arabic-view .arabic-table td:first-child,
+.arabic-view .arabic-table td:nth-child(2) {
+    text-align: right;
+}
+
+.arabic-view .arabic-table input[dir="auto"] {
+    text-align: right;
+}
+
+.arabic-view .invoice-header {
+    direction: rtl;
+    flex-direction: row !important;
+}
+
+.arabic-view .company-section {
+    flex-direction: row !important;
+    text-align: right;
+}
+
+.arabic-view .invoice-meta {
+    direction: rtl;
+    align-items: stretch;
+    text-align: right;
+}
+
+.arabic-view .meta-row,
+.arabic-view .summary-box {
+    direction: rtl;
+    flex-direction: row !important;
+}
+
+.arabic-view .summary-section {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.arabic-view .invoice-stamp {
+    right: auto;
+    left: 45px;
+    transform: rotate(18deg);
+    letter-spacing: 1px;
+}
+
+.arabic-view .preview-actions,
+.arabic-view .table-actions,
+.arabic-view .main-actions {
+    text-align: right;
+}
+
+@media (max-width: 900px) {
+    .arabic-view .invoice-header {
+        flex-direction: column !important;
+    }
+
+    .arabic-view .invoice-meta {
+        width: 100%;
+    }
+
+    .arabic-view .invoice-stamp {
+        top: 105px;
+        left: 22px;
+        font-size: 28px;
+        border-width: 4px;
+    }
+}

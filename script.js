@@ -1,464 +1,198 @@
-// script.js
-
+// The Arabic interface intentionally uses its own DOM and explicit RTL attributes.
+// Firebase configuration and the shared counter remain in index.html and are unchanged.
 let currentLanguage = "en";
 
 const translations = {
-
     en: {
-        formTitle: "Invoice Generator",
-        orderNo: "Order Number",
-        issueDate: "Issue Date",
-        customerName: "Customer Name",
-        delivery: "Delivery Location",
-        payment: "Payment Method",
-        notes: "Additional Notes",
-        item: "Item",
-        size: "Size",
-        qty: "Quantity",
-        total: "Total",
-        action: "Action",
-        addItem: "Add Item",
-        finalTotal: "Final Total",
-        paidAmount: "Paid Amount (Including Delivery)",
-        preview: "Preview Invoice",
-        back: "Back",
-        pdf: "Export PDF",
-        invoice: "Invoice",
-        dinar: "Dinar",
-        fils: "Fils"
-    },
-
-    ar: {
-        formTitle: "إنشاء فاتورة",
-        orderNo: "رقم الطلب",
-        issueDate: "تاريخ الإصدار",
-        customerName: "اسم العميل",
-        delivery: "موقع التوصيل",
-        payment: "طريقة الدفع",
-        notes: "ملاحظات إضافية",
-        item: "الصنف",
-        size: "المقاس",
-        qty: "الكمية",
-        total: "الإجمالي",
-        action: "إجراء",
-        addItem: "إضافة عنصر",
-        finalTotal: "الإجمالي النهائي",
-        paidAmount: "المبلغ المدفوع شامل التوصيل",
-        preview: "معاينة الفاتورة",
-        back: "رجوع",
-        pdf: "تصدير PDF",
-        invoice: "فاتورة",
-        dinar: "دينار",
-        fils: "فلس"
+        formTitle: "Invoice Generator", orderNo: "Order Number", issueDate: "Issue Date",
+        customerName: "Customer Name", delivery: "Delivery Location", payment: "Payment Method",
+        notes: "Additional Notes", item: "Item", size: "Size", qty: "Quantity", total: "Total",
+        action: "Action", addItem: "Add Item", finalTotal: "Final Total",
+        paidAmount: "Paid Amount (Including Delivery)", preview: "Preview Invoice", back: "Back",
+        pdf: "Export PDF", invoice: "Invoice", dinar: "Dinar", fils: "Fils"
     }
 };
 
+const englishTextIds = {
+    formTitle: "formTitle", orderNo: "labelOrderNo", issueDate: "labelIssueDate",
+    customerName: "labelCustomerName", delivery: "labelDelivery", payment: "labelPayment",
+    notes: "labelNotes", item: "thItem", size: "thSize", qty: "thQty", total: "thTotal",
+    action: "thAction", finalTotal: "labelFinalTotal", paidAmount: "labelPaidAmount",
+    preview: "previewBtn", back: "backBtn", pdf: "pdfBtn", invoice: "invoiceLabel",
+    previewItem: "previewItemHeader", previewSize: "previewSizeHeader", previewQty: "previewQtyHeader",
+    previewTotal: "previewTotalHeader", summaryTotal: "summaryTotalLabel",
+    summaryPaid: "summaryPaidLabel", previewNotes: "notesLabelPreview"
+};
+
+function isArabic() {
+    return currentLanguage === "ar";
+}
+
+function viewId(englishId, arabicId) {
+    return document.getElementById(isArabic() ? arabicId : englishId);
+}
+
+function fields() {
+    return isArabic() ? {
+        orderNo: "arOrderNo", issueDate: "arIssueDate", customer: "arCustomerName",
+        delivery: "arDeliveryLocation", payment: "arPaymentMethod", notes: "arNotes",
+        tableBody: "arTableBody", finalTotal: "arFinalTotal", paidAmount: "arPaidAmount",
+        previewBody: "arPreviewTableBody", previewOrder: "arPreviewOrderNo", previewDate: "arPreviewIssueDate",
+        previewCustomer: "arPreviewCustomer", previewDelivery: "arPreviewDelivery", previewPayment: "arPreviewPayment",
+        previewNotes: "arPreviewNotes", summaryTotal: "arSummaryTotal", summaryPaid: "arSummaryPaid",
+        invoice: "arabicInvoicePreview"
+    } : {
+        orderNo: "orderNo", issueDate: "issueDate", customer: "customerName",
+        delivery: "deliveryLocation", payment: "paymentMethod", notes: "notes",
+        tableBody: "tableBody", finalTotal: "finalTotal", paidAmount: "paidAmount",
+        previewBody: "previewTableBody", previewOrder: "previewOrderNo", previewDate: "previewIssueDate",
+        previewCustomer: "previewCustomer", previewDelivery: "previewDelivery", previewPayment: "previewPayment",
+        previewNotes: "previewNotes", summaryTotal: "summaryTotal", summaryPaid: "summaryPaid",
+        invoice: "invoicePreview"
+    };
+}
+
 function setLanguage(lang) {
-
     currentLanguage = lang;
-
+    document.documentElement.lang = lang;
     document.getElementById("languageScreen").style.display = "none";
     document.getElementById("app").classList.remove("hidden");
-
     document.body.classList.toggle("rtl", lang === "ar");
     document.body.dir = lang === "ar" ? "rtl" : "ltr";
 
-    applyTranslations();
+    document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+    document.getElementById(lang === "ar" ? "arabicFormScreen" : "formScreen").classList.add("active");
 
-    document.getElementById("formScreen").classList.add("active");
-
-    if (document.querySelectorAll("#tableBody tr").length === 0) {
-        addRow();
-    }
-
+    if (lang === "en") applyTranslations();
+    const f = fields();
+    if (document.querySelectorAll(`#${f.tableBody} tr`).length === 0) addRow();
     getCurrentInvoiceNumber();
 }
 
 function applyTranslations() {
-
-    const t = translations[currentLanguage];
-
-    document.getElementById("formTitle").innerText = t.formTitle;
-    document.getElementById("labelOrderNo").innerText = t.orderNo;
-    document.getElementById("labelIssueDate").innerText = t.issueDate;
-    document.getElementById("labelCustomerName").innerText = t.customerName;
-    document.getElementById("labelDelivery").innerText = t.delivery;
-    document.getElementById("labelPayment").innerText = t.payment;
-    document.getElementById("labelNotes").innerText = t.notes;
-
-    document.getElementById("thItem").innerText = t.item;
-    document.getElementById("thSize").innerText = t.size;
-    document.getElementById("thQty").innerText = t.qty;
-    document.getElementById("thTotal").innerText = t.total;
-    document.getElementById("thAction").innerText = t.action;
-
-    /*document.getElementById("currencySplit").innerText =
-        `${t.dinar} / ${t.fils}`;
-*/
-    if (currentLanguage === "ar") {
-
-        document.getElementById("currencySplit").innerText =
-            `${t.fils} / ${t.dinar}`;
-
-    } else {
-
-        document.getElementById("currencySplit").innerText =
-            `${t.dinar} / ${t.fils}`;
-    }
-
-    document.getElementById("addRowBtn").innerText =
-        `+ ${t.addItem}`;
-
-    document.getElementById("labelFinalTotal").innerText =
-        t.finalTotal;
-
-    document.getElementById("labelPaidAmount").innerText =
-        t.paidAmount;
-
-    document.getElementById("previewBtn").innerText =
-        t.preview;
-
-    document.getElementById("backBtn").innerText =
-        t.back;
-
-    document.getElementById("pdfBtn").innerText =
-        t.pdf;
-
-    document.getElementById("invoiceLabel").innerText =
-        t.invoice;
-
-    document.getElementById("previewOrderLabel").innerText =
-        `${t.orderNo}:`;
-
-    document.getElementById("previewDateLabel").innerText =
-        `${t.issueDate}:`;
-
-    document.getElementById("previewCustomerLabel").innerText =
-        t.customerName;
-
-    document.getElementById("previewDeliveryLabel").innerText =
-        t.delivery;
-
-    document.getElementById("previewPaymentLabel").innerText =
-        t.payment;
-
-    document.getElementById("previewItemHeader").innerText =
-        t.item;
-
-    document.getElementById("previewSizeHeader").innerText =
-        t.size;
-
-    document.getElementById("previewQtyHeader").innerText =
-        t.qty;
-
-    document.getElementById("previewTotalHeader").innerText =
-        t.total;
-
-    if (currentLanguage === "ar") {
-
-        document.getElementById("dinarLabel").innerText =
-            t.fils;
-
-        document.getElementById("filsLabel").innerText =
-            t.dinar;
-
-    } else {
-
-        document.getElementById("dinarLabel").innerText =
-            t.dinar;
-
-        document.getElementById("filsLabel").innerText =
-            t.fils;
-    }
-
-    document.getElementById("summaryTotalLabel").innerText =
-        t.finalTotal;
-
-    document.getElementById("summaryPaidLabel").innerText =
-        t.paidAmount;
-
-    document.getElementById("notesLabelPreview").innerText =
-        t.notes;
+    const t = translations.en;
+    Object.entries(englishTextIds).forEach(([key, id]) => {
+        const element = document.getElementById(id);
+        if (element && t[key]) element.innerText = t[key];
+    });
+    document.getElementById("addRowBtn").innerText = `+ ${t.addItem}`;
+    document.getElementById("currencySplit").innerText = `${t.dinar} / ${t.fils}`;
+    document.getElementById("previewOrderLabel").innerText = `${t.orderNo}:`;
+    document.getElementById("previewDateLabel").innerText = `${t.issueDate}:`;
+    document.getElementById("previewCustomerLabel").innerText = t.customerName;
+    document.getElementById("previewDeliveryLabel").innerText = t.delivery;
+    document.getElementById("previewPaymentLabel").innerText = t.payment;
+    document.getElementById("dinarLabel").innerText = t.dinar;
+    document.getElementById("filsLabel").innerText = t.fils;
 }
 
 function addRow() {
-
-    const tbody = document.getElementById("tableBody");
-
+    const f = fields();
     const row = document.createElement("tr");
-
     row.innerHTML = `
-    <td><input type="text"></td>
-
-    <td><input type="text"></td>
-
-    <td>
-      <input type="number" min="1" value="1">
-    </td>
-
-    <td>
-      <input
-        type="text"
-        class="decimal-only amount-input"
-        placeholder="0.000"
-      >
-    </td>
-
-    <td>
-      <button class="delete-btn" onclick="deleteRow(this)">
-        X
-      </button>
-    </td>
-  `;
-
-    tbody.appendChild(row);
-
-    attachDecimalValidation();
-
-    row.querySelector(".amount-input")
-        .addEventListener("input", calculateTotals);
+        <td><input type="text" dir="auto" aria-label="${isArabic() ? "الصنف" : "Item"}"></td>
+        <td><input type="text" dir="auto" aria-label="${isArabic() ? "المقاس" : "Size"}"></td>
+        <td><input type="number" min="1" value="1" dir="ltr" aria-label="${isArabic() ? "الكمية" : "Quantity"}"></td>
+        <td><input type="text" class="decimal-only amount-input" inputmode="decimal" placeholder="0.000" dir="ltr" aria-label="${isArabic() ? "الإجمالي" : "Total"}"></td>
+        <td><button class="delete-btn" type="button" onclick="deleteRow(this)" aria-label="${isArabic() ? "حذف العنصر" : "Delete item"}">×</button></td>`;
+    document.getElementById(f.tableBody).appendChild(row);
+    const amount = row.querySelector(".amount-input");
+    amount.addEventListener("input", validateDecimal);
 }
 
 function deleteRow(button) {
-
     button.closest("tr").remove();
-
     calculateTotals();
 }
 
-function attachDecimalValidation() {
-
-    const inputs = document.querySelectorAll(".decimal-only");
-
-    inputs.forEach(input => {
-
-        input.addEventListener("input", function () {
-
-            this.value = this.value.replace(/[^0-9.]/g, '');
-
-            const parts = this.value.split('.');
-
-            if (parts.length > 2) {
-                this.value =
-                    parts[0] + '.' + parts.slice(1).join('');
-            }
-
-            calculateTotals();
-        });
-    });
+function validateDecimal(event) {
+    const input = event.currentTarget;
+    input.value = input.value.replace(/[^0-9.]/g, "");
+    const [whole, ...decimals] = input.value.split(".");
+    input.value = decimals.length ? `${whole}.${decimals.join("")}` : whole;
+    calculateTotals();
 }
 
 function calculateTotals() {
-
-    const amountInputs =
-        document.querySelectorAll(".amount-input");
-
+    const f = fields();
     let total = 0;
-
-    amountInputs.forEach(input => {
-
-        const value = parseFloat(input.value);
-
-        if (!isNaN(value)) {
-            total += value;
-        }
+    document.querySelectorAll(`#${f.tableBody} .amount-input`).forEach(input => {
+        const value = Number.parseFloat(input.value);
+        if (Number.isFinite(value)) total += value;
     });
-
-    document.getElementById("finalTotal").value =
-        total.toFixed(3);
+    document.getElementById(f.finalTotal).value = total.toFixed(3);
 }
 
 function splitCurrency(value) {
-
-    const fixed = Number(value || 0).toFixed(3);
-
-    const [dinar, fils] = fixed.split('.');
-
+    const [dinar, fils] = Number(value || 0).toFixed(3).split(".");
     return { dinar, fils };
 }
 
+function setText(id, value) {
+    document.getElementById(id).textContent = value;
+}
+
 function generatePreview() {
+    const f = fields();
+    document.getElementById(isArabic() ? "arabicFormScreen" : "formScreen").classList.remove("active");
+    document.getElementById(isArabic() ? "arabicPreviewScreen" : "previewScreen").classList.add("active");
+    setText(f.previewOrder, document.getElementById(f.orderNo).value);
+    setText(f.previewDate, document.getElementById(f.issueDate).value);
+    setText(f.previewCustomer, document.getElementById(f.customer).value);
+    setText(f.previewDelivery, document.getElementById(f.delivery).value);
+    setText(f.previewPayment, document.getElementById(f.payment).value);
+    setText(f.previewNotes, document.getElementById(f.notes).value);
 
-    document.getElementById("formScreen")
-        .classList.remove("active");
-
-    document.getElementById("previewScreen")
-        .classList.add("active");
-
-    // BASIC INFO
-    document.getElementById("previewOrderNo").innerText =
-        document.getElementById("orderNo").value;
-
-    document.getElementById("previewIssueDate").innerText =
-        document.getElementById("issueDate").value;
-
-    document.getElementById("previewCustomer").innerText =
-        document.getElementById("customerName").value;
-
-    document.getElementById("previewDelivery").innerText =
-        document.getElementById("deliveryLocation").value;
-
-    document.getElementById("previewPayment").innerText =
-        document.getElementById("paymentMethod").value;
-
-    document.getElementById("previewNotes").innerText =
-        document.getElementById("notes").value;
-
-    // TABLE
-    const previewBody =
-        document.getElementById("previewTableBody");
-
-    previewBody.innerHTML = "";
-
-    const rows =
-        document.querySelectorAll("#tableBody tr");
-
-    rows.forEach(row => {
-
+    const previewBody = document.getElementById(f.previewBody);
+    previewBody.replaceChildren();
+    document.querySelectorAll(`#${f.tableBody} tr`).forEach(row => {
         const inputs = row.querySelectorAll("input");
-
-        const item = inputs[0].value;
-        const size = inputs[1].value;
-        const qty = inputs[2].value;
-        const total = inputs[3].value;
-
-        const split = splitCurrency(total);
-
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-      <td>${item}</td>
-      <td>${size}</td>
-      <td>${qty}</td>
-      <td>${split.dinar}</td>
-      <td>${split.fils}</td>
-    `;
-
-        previewBody.appendChild(tr);
+        const split = splitCurrency(inputs[3].value);
+        const cells = isArabic()
+            ? [inputs[0].value, inputs[1].value, inputs[2].value, split.fils, split.dinar]
+            : [inputs[0].value, inputs[1].value, inputs[2].value, split.dinar, split.fils];
+        const previewRow = document.createElement("tr");
+        cells.forEach(value => { const cell = document.createElement("td"); cell.textContent = value; previewRow.appendChild(cell); });
+        previewBody.appendChild(previewRow);
     });
-
-    document.getElementById("summaryTotal").innerText =
-        document.getElementById("finalTotal").value;
-
-    document.getElementById("summaryPaid").innerText =
-        document.getElementById("paidAmount").value;
+    setText(f.summaryTotal, document.getElementById(f.finalTotal).value);
+    setText(f.summaryPaid, document.getElementById(f.paidAmount).value);
 }
 
 function backToForm() {
-
-    document.getElementById("previewScreen")
-        .classList.remove("active");
-
-    document.getElementById("formScreen")
-        .classList.add("active");
+    document.getElementById(isArabic() ? "arabicPreviewScreen" : "previewScreen").classList.remove("active");
+    document.getElementById(isArabic() ? "arabicFormScreen" : "formScreen").classList.add("active");
 }
 
 function exportPDF() {
-
-    const invoice =
-        document.getElementById("invoicePreview");
-
-    const options = {
-
-        margin: 5,
-        filename:
-            (
-                'Kw' +
-                (
-                    document.getElementById("orderNo")
-                        .value
-                        .replace('#', '')
-                )
-            ) + '.pdf',
-
-        image: {
-            type: 'jpeg',
-            quality: 1
-        },
-        /*    aaaaaaaa tsesttt */
-        html2canvas: {
-            scale: 0.9,
-            useCORS: true
-        },
-
-        jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait'
-        }
-    };
-
-    html2pdf()
-        .set(options)
-        .from(invoice)
-        .save()
-        .then(async () => {
-
-            await incrementInvoiceNumber();
-
-            await getCurrentInvoiceNumber();
-        });
+    const f = fields();
+    const orderNumber = document.getElementById(f.orderNo).value.replace("#", "");
+    html2pdf().set({
+        margin: 5, filename: `Kw${orderNumber}.pdf`,
+        image: { type: "jpeg", quality: 1 }, html2canvas: { scale: 0.9, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+    }).from(document.getElementById(f.invoice)).save().then(async () => {
+        await incrementInvoiceNumber();
+        await getCurrentInvoiceNumber();
+    });
 }
 
-// SERIAL NUMBER SYSTEM
-
+// SERIAL NUMBER SYSTEM — unchanged Firestore collection, document and fields.
 async function getCurrentInvoiceNumber() {
-
-    const {
-        doc,
-        getDoc,
-        setDoc
-    } = window.firebaseTools;
-
-    const counterRef =
-        doc(window.db, "system", "invoiceCounter");
-
-    const counterSnap =
-        await getDoc(counterRef);
-
+    const { doc, getDoc, setDoc } = window.firebaseTools;
+    const counterRef = doc(window.db, "system", "invoiceCounter");
+    const counterSnap = await getDoc(counterRef);
     let currentNumber = 1;
-
-    if (!counterSnap.exists()) {
-
-        await setDoc(counterRef, {
-            current: 1
-        });
-
-    } else {
-
-        currentNumber =
-            counterSnap.data().current;
-    }
-
-    const formatted =
-        "#" +
-        String(currentNumber)
-            .padStart(4, "0");
-
-    document.getElementById("orderNo").value =
-        formatted;
+    if (!counterSnap.exists()) await setDoc(counterRef, { current: 1 });
+    else currentNumber = counterSnap.data().current;
+    document.getElementById(fields().orderNo).value = `#${String(currentNumber).padStart(4, "0")}`;
 }
+
 async function incrementInvoiceNumber() {
-
-    const {
-        doc,
-        getDoc,
-        updateDoc
-    } = window.firebaseTools;
-
-    const counterRef =
-        doc(window.db, "system", "invoiceCounter");
-
-    const counterSnap =
-        await getDoc(counterRef);
-
+    const { doc, getDoc, updateDoc } = window.firebaseTools;
+    const counterRef = doc(window.db, "system", "invoiceCounter");
+    const counterSnap = await getDoc(counterRef);
     if (counterSnap.exists()) {
-
-        const currentNumber =
-            counterSnap.data().current;
-
-        await updateDoc(counterRef, {
-            current: currentNumber + 1
-        });
+        await updateDoc(counterRef, { current: counterSnap.data().current + 1 });
     }
 }
