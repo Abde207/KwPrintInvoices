@@ -170,30 +170,28 @@ function backToForm() {
     document.getElementById(isArabic() ? "arabicFormScreen" : "formScreen").classList.add("active");
 }
 
-async function exportPDF() {
+function exportPDF() {
     const f = fields();
-
-    // html2pdf rasterizes the page through html2canvas, which reverses RTL
-    // layout in some browsers. Native printing keeps the rendered Arabic view
-    // intact; choose "Save to PDF" in the browser print dialog.
-    if (isArabic()) {
-        if (document.fonts && document.fonts.ready) {
-            await document.fonts.ready;
-        }
-
-        window.print();
-        await incrementInvoiceNumber();
-        await getCurrentInvoiceNumber();
-        return;
-    }
-
     const orderNumber = document.getElementById(f.orderNo).value.replace("#", "");
-    html2pdf().set({
+    const pdfOptions = {
         margin: 5, filename: `Kw${orderNumber}.pdf`,
         image: { type: "jpeg", quality: 1 },
         html2canvas: { scale: 0.9, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-    }).from(document.getElementById(f.invoice)).save().then(async () => {
+    };
+
+    // Render the Arabic document through the browser's DOM engine before it is
+    // converted to a PDF image. This keeps the direct-save workflow while
+    // giving RTL text and flex layouts a more accurate rendering path.
+    if (isArabic()) {
+        pdfOptions.html2canvas = {
+            scale: 1,
+            useCORS: true,
+            foreignObjectRendering: true
+        };
+    }
+
+    html2pdf().set(pdfOptions).from(document.getElementById(f.invoice)).save().then(async () => {
         await incrementInvoiceNumber();
         await getCurrentInvoiceNumber();
     });
