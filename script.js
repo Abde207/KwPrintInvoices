@@ -152,7 +152,13 @@ function generatePreview() {
             ? [inputs[0].value, inputs[1].value, inputs[2].value, split.fils, split.dinar]
             : [inputs[0].value, inputs[1].value, inputs[2].value, split.dinar, split.fils];
         const previewRow = document.createElement("tr");
-        cells.forEach(value => { const cell = document.createElement("td"); cell.textContent = value; previewRow.appendChild(cell); });
+        cells.forEach((value, index) => {
+            const cell = document.createElement("td");
+            // Keep Arabic product text and Latin/numeric values in their natural directions.
+            cell.dir = isArabic() && index < 2 ? "auto" : "ltr";
+            cell.textContent = value;
+            previewRow.appendChild(cell);
+        });
         previewBody.appendChild(previewRow);
     });
     setText(f.summaryTotal, document.getElementById(f.finalTotal).value);
@@ -167,11 +173,37 @@ function backToForm() {
 function exportPDF() {
     const f = fields();
     const orderNumber = document.getElementById(f.orderNo).value.replace("#", "");
-    html2pdf().set({
+    const pdfOptions = {
         margin: 5, filename: `Kw${orderNumber}.pdf`,
-        image: { type: "jpeg", quality: 1 }, html2canvas: { scale: 0.9, useCORS: true },
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { scale: 0.9, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-    }).from(document.getElementById(f.invoice)).save().then(async () => {
+    };
+
+    // html2pdf renders a cloned document. Apply RTL directly to that clone so
+    // Arabic ordering stays correct even when the live page's body direction is
+    // not inherited by the renderer.
+    if (isArabic()) {
+        pdfOptions.html2canvas.onclone = clonedDocument => {
+            const invoice = clonedDocument.getElementById("arabicInvoicePreview");
+            if (!invoice) return;
+
+            invoice.setAttribute("dir", "rtl");
+            invoice.style.direction = "rtl";
+            invoice.style.textAlign = "right";
+
+            invoice.querySelectorAll(".arabic-table, .arabic-table tr").forEach(element => {
+                element.setAttribute("dir", "rtl");
+                element.style.direction = "rtl";
+            });
+
+            invoice.querySelectorAll("td, th, .meta-row, .summary-box").forEach(element => {
+                element.style.unicodeBidi = "isolate";
+            });
+        };
+    }
+
+    html2pdf().set(pdfOptions).from(document.getElementById(f.invoice)).save().then(async () => {
         await incrementInvoiceNumber();
         await getCurrentInvoiceNumber();
     });
