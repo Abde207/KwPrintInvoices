@@ -345,6 +345,11 @@ body.rtl .summary-box {
 
 @media print {
 
+    @page {
+        size: A4 portrait;
+        margin: 5mm;
+    }
+
     body {
         background: white;
     }
@@ -356,6 +361,11 @@ body.rtl .summary-box {
     .invoice-paper {
         box-shadow: none;
         margin: 0;
+    }
+
+    .container {
+        max-width: none;
+        padding: 0;
     }
 }
 
