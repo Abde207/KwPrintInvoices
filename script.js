@@ -188,18 +188,78 @@ function exportPDF() {
             const invoice = clonedDocument.getElementById("arabicInvoicePreview");
             if (!invoice) return;
 
-            invoice.setAttribute("dir", "rtl");
-            invoice.style.direction = "rtl";
+            // html2canvas does not consistently inherit RTL flex positioning.
+            // Use LTR as the layout coordinate system, then reverse each Arabic
+            // layout row explicitly. This reproduces the on-screen Arabic order.
+            invoice.style.direction = "ltr";
             invoice.style.textAlign = "right";
+
+            const header = invoice.querySelector(".invoice-header");
+            if (header) {
+                header.style.direction = "ltr";
+                header.style.flexDirection = "row-reverse";
+            }
+
+            const company = invoice.querySelector(".company-section");
+            if (company) {
+                company.style.direction = "ltr";
+                company.style.flexDirection = "row-reverse";
+                const companyText = company.querySelector("div");
+                if (companyText) {
+                    companyText.style.direction = "rtl";
+                    companyText.style.textAlign = "right";
+                }
+            }
+
+            invoice.querySelectorAll(".meta-row").forEach(row => {
+                row.style.display = "flex";
+                row.style.direction = "ltr";
+                row.style.flexDirection = "row-reverse";
+                row.style.justifyContent = "space-between";
+                row.querySelectorAll("span").forEach(label => {
+                    label.style.direction = "rtl";
+                    label.style.textAlign = "right";
+                });
+            });
+
+            const customerSection = invoice.querySelector(".customer-section");
+            if (customerSection) {
+                customerSection.style.display = "flex";
+                customerSection.style.direction = "ltr";
+                customerSection.style.flexDirection = "row-reverse";
+                customerSection.querySelectorAll(".customer-card").forEach(card => {
+                    card.style.flex = "1";
+                    card.style.direction = "rtl";
+                    card.style.textAlign = "right";
+                });
+            }
 
             invoice.querySelectorAll(".arabic-table, .arabic-table tr").forEach(element => {
                 element.setAttribute("dir", "rtl");
                 element.style.direction = "rtl";
             });
 
-            invoice.querySelectorAll("td, th, .meta-row, .summary-box").forEach(element => {
-                element.style.unicodeBidi = "isolate";
+            invoice.querySelectorAll(".arabic-table td, .arabic-table th").forEach(cell => {
+                cell.style.unicodeBidi = "plaintext";
             });
+
+            invoice.querySelectorAll(".summary-box").forEach(box => {
+                box.style.display = "flex";
+                box.style.direction = "ltr";
+                box.style.flexDirection = "row-reverse";
+                box.style.justifyContent = "space-between";
+                const label = box.querySelector("span");
+                if (label) {
+                    label.style.direction = "rtl";
+                    label.style.textAlign = "right";
+                }
+            });
+
+            const notes = invoice.querySelector(".notes-section");
+            if (notes) {
+                notes.style.direction = "rtl";
+                notes.style.textAlign = "right";
+            }
         };
     }
 
