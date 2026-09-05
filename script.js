@@ -170,42 +170,31 @@ function backToForm() {
     document.getElementById(isArabic() ? "arabicFormScreen" : "formScreen").classList.add("active");
 }
 
-async function exportPDF() {
+function exportPDF() {
     const f = fields();
     const orderNumber = document.getElementById(f.orderNo).value.replace("#", "");
-    const invoice = document.getElementById(f.invoice);
     const pdfOptions = {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false
+        margin: 5, filename: `Kw${orderNumber}.pdf`,
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { scale: 0.9, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
     };
 
-    // html2canvas's normal text painter does not consistently preserve Arabic
-    // shaping and word order. foreignObjectRendering delegates the Arabic
-    // invoice to the browser's native layout engine before it becomes an image.
+    // Render the Arabic document through the browser's DOM engine before it is
+    // converted to a PDF image. This keeps the direct-save workflow while
+    // giving RTL text and flex layouts a more accurate rendering path.
     if (isArabic()) {
-        pdfOptions.foreignObjectRendering = true;
+        pdfOptions.html2canvas = {
+            scale: 1,
+            useCORS: true,
+            foreignObjectRendering: true
+        };
     }
 
-    try {
-        await document.fonts.ready;
-        invoice.classList.add("pdf-exporting");
-        const canvas = await html2canvas(invoice, pdfOptions);
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-
-        addCanvasSliceToPdf(pdf, canvas, 200, 287, 5, `Kw${orderNumber}.pdf`);
+    html2pdf().set(pdfOptions).from(document.getElementById(f.invoice)).save().then(async () => {
         await incrementInvoiceNumber();
         await getCurrentInvoiceNumber();
-    } catch (error) {
-        console.error("PDF export failed", error);
-        alert(isArabic()
-            ? "تعذر إنشاء ملف PDF. يرجى المحاولة مرة أخرى."
-            : "The PDF could not be created. Please try again.");
-    } finally {
-        invoice.classList.remove("pdf-exporting");
-    }
+    });
 }
 
 // SERIAL NUMBER SYSTEM — unchanged Firestore collection, document and fields.
@@ -226,36 +215,4 @@ async function incrementInvoiceNumber() {
     if (counterSnap.exists()) {
         await updateDoc(counterRef, { current: counterSnap.data().current + 1 });
     }
-}
-
-function addCanvasSliceToPdf(pdf, canvas, pageWidth, pageHeight, margin, filename) {
-    const sliceHeight = Math.floor((pageHeight * canvas.width) / pageWidth);
-    const pageCanvas = document.createElement("canvas");
-    pageCanvas.width = canvas.width;
-
-    let renderedHeight = 0;
-    let pageIndex = 0;
-
-    while (renderedHeight < canvas.height) {
-        const currentSliceHeight = Math.min(sliceHeight, canvas.height - renderedHeight);
-        pageCanvas.height = currentSliceHeight;
-
-        const ctx = pageCanvas.getContext("2d");
-        ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-        ctx.drawImage(
-            canvas,
-            0, renderedHeight, canvas.width, currentSliceHeight,
-            0, 0, pageCanvas.width, pageCanvas.height
-        );
-
-        const imageData = pageCanvas.toDataURL("image/png");
-        if (pageIndex > 0) pdf.addPage();
-        const imageHeight = (currentSliceHeight * pageWidth) / canvas.width;
-        pdf.addImage(imageData, "PNG", margin, margin, pageWidth, imageHeight);
-
-        renderedHeight += currentSliceHeight;
-        pageIndex += 1;
-    }
-
-    pdf.save(filename);
 }
