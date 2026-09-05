@@ -704,6 +704,17 @@ body.rtl .table-actions {
     text-align: right;
 }
 
+/* PDF capture must retain the invoice's native Arabic direction, independently
+   of the surrounding page or the browser's print defaults. */
+.arabic-invoice.pdf-exporting {
+    direction: rtl;
+    text-align: right;
+}
+
+.arabic-invoice.pdf-exporting .arabic-table {
+    direction: rtl;
+}
+
 @media (max-width: 900px) {
     .arabic-view .invoice-header {
         flex-direction: column !important;
