@@ -626,14 +626,12 @@ body.rtl .table-actions {
 
 .arabic-view .arabic-table {
     direction: rtl;
-    table-layout: fixed;
 }
 
 .arabic-view .arabic-table th,
 .arabic-view .arabic-table td {
     text-align: center;
     vertical-align: middle;
-    unicode-bidi: isolate;
 }
 
 .arabic-view .arabic-table td:first-child,
@@ -664,16 +662,7 @@ body.rtl .table-actions {
 .arabic-view .meta-row,
 .arabic-view .summary-box {
     direction: rtl;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-}
-
-.arabic-view .meta-row strong,
-.arabic-view .summary-box strong {
-    direction: ltr;
-    text-align: left;
-    unicode-bidi: isolate;
+    flex-direction: row !important;
 }
 
 .arabic-view .summary-section {
