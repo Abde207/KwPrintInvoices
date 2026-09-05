@@ -170,30 +170,100 @@ function backToForm() {
     document.getElementById(isArabic() ? "arabicFormScreen" : "formScreen").classList.add("active");
 }
 
-async function exportPDF() {
+function exportPDF() {
     const f = fields();
-
-    // html2pdf rasterizes the page through html2canvas, which reverses RTL
-    // layout in some browsers. Native printing keeps the rendered Arabic view
-    // intact; choose "Save to PDF" in the browser print dialog.
-    if (isArabic()) {
-        if (document.fonts && document.fonts.ready) {
-            await document.fonts.ready;
-        }
-
-        window.print();
-        await incrementInvoiceNumber();
-        await getCurrentInvoiceNumber();
-        return;
-    }
-
     const orderNumber = document.getElementById(f.orderNo).value.replace("#", "");
-    html2pdf().set({
+    const pdfOptions = {
         margin: 5, filename: `Kw${orderNumber}.pdf`,
         image: { type: "jpeg", quality: 1 },
         html2canvas: { scale: 0.9, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-    }).from(document.getElementById(f.invoice)).save().then(async () => {
+    };
+
+    // html2pdf renders a cloned document. Apply RTL directly to that clone so
+    // Arabic ordering stays correct even when the live page's body direction is
+    // not inherited by the renderer.
+    if (isArabic()) {
+        pdfOptions.html2canvas.onclone = clonedDocument => {
+            const invoice = clonedDocument.getElementById("arabicInvoicePreview");
+            if (!invoice) return;
+
+            // html2canvas does not consistently inherit RTL flex positioning.
+            // Use LTR as the layout coordinate system, then reverse each Arabic
+            // layout row explicitly. This reproduces the on-screen Arabic order.
+            invoice.style.direction = "ltr";
+            invoice.style.textAlign = "right";
+
+            const header = invoice.querySelector(".invoice-header");
+            if (header) {
+                header.style.direction = "ltr";
+                header.style.flexDirection = "row-reverse";
+            }
+
+            const company = invoice.querySelector(".company-section");
+            if (company) {
+                company.style.direction = "ltr";
+                company.style.flexDirection = "row-reverse";
+                const companyText = company.querySelector("div");
+                if (companyText) {
+                    companyText.style.direction = "rtl";
+                    companyText.style.textAlign = "right";
+                }
+            }
+
+            invoice.querySelectorAll(".meta-row").forEach(row => {
+                row.style.display = "flex";
+                row.style.direction = "ltr";
+                row.style.flexDirection = "row-reverse";
+                row.style.justifyContent = "space-between";
+                row.querySelectorAll("span").forEach(label => {
+                    label.style.direction = "rtl";
+                    label.style.textAlign = "right";
+                });
+            });
+
+            const customerSection = invoice.querySelector(".customer-section");
+            if (customerSection) {
+                customerSection.style.display = "flex";
+                customerSection.style.direction = "ltr";
+                customerSection.style.flexDirection = "row-reverse";
+                customerSection.querySelectorAll(".customer-card").forEach(card => {
+                    card.style.flex = "1";
+                    card.style.direction = "rtl";
+                    card.style.textAlign = "right";
+                });
+            }
+
+            invoice.querySelectorAll(".arabic-table, .arabic-table tr").forEach(element => {
+                element.setAttribute("dir", "rtl");
+                element.style.direction = "rtl";
+            });
+
+            invoice.querySelectorAll(".arabic-table td, .arabic-table th").forEach(cell => {
+                cell.style.unicodeBidi = "plaintext";
+            });
+
+            invoice.querySelectorAll(".summary-box").forEach(box => {
+                box.style.display = "flex";
+                box.style.direction = "ltr";
+                box.style.flexDirection = "row-reverse";
+                box.style.justifyContent = "space-between";
+                const label = box.querySelector("span");
+                if (label) {
+                    label.style.direction = "rtl";
+                    label.style.textAlign = "right";
+                }
+            });
+
+            const notes = invoice.querySelector(".notes-section");
+            if (notes) {
+                notes.style.direction = "rtl";
+                notes.style.textAlign = "right";
+            }
+        };
+    }
+
+    html2pdf().set(pdfOptions).from(document.getElementById(f.invoice)).save().then(async () => {
         await incrementInvoiceNumber();
         await getCurrentInvoiceNumber();
     });
